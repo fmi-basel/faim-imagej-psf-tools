@@ -12,9 +12,7 @@ today = ""+year+"-"+Monthadjust+month+"-"+Dayadjust+dayOfMonth;
 //_______________________Retrieve last saved Info________________________
 
 S=fromCharCode(92);
-dir=S+S+"imagestore"+S+"FAIM"+S+"Maintenance_All microscopes"+S;
-title="[LogFileImageJ.txt]";
-path=dir+"LogFileImageJ.txt";
+path="C:"+S+"Users"+S+"Public"+S+"LogFileImageJ.txt";
 
 	microscope="microscope";
 	MA=100;
@@ -24,31 +22,30 @@ path=dir+"LogFileImageJ.txt";
 	date=today;
 
 if (File.exists(path)==1) {
-	open(path);
-	Info=getInfo("window.contents");
-	firstK=substring(Info, 0, 1);
-	if (Info!="" && firstK!="~") {
-	index1=indexOf(Info, ";")+1;
-	index2=indexOf(Info, ";", index1)+1;
-	index3=indexOf(Info, ";", index2)+1;
-	index4=indexOf(Info, ";", index3)+1;
-	index5=indexOf(Info, ";", index4)+1;
+	Info = File.openAsString(path);
+	if (Info!="") {
+		firstK=substring(Info, 0, 1);
+		if (firstK!="~") {
+			index1=indexOf(Info, ";")+1;
+			index2=indexOf(Info, ";", index1)+1;
+			index3=indexOf(Info, ";", index2)+1;
+			index4=indexOf(Info, ";", index3)+1;
+			index5=indexOf(Info, ";", index4)+1;
 
-	microscope=substring(Info, 0, index1-1);
-	MA=substring(Info, index1, index2-1);
-	NA=substring(Info, index2, index3-1);
-	xyVoxel=substring(Info, index3, index4-1);
-	zVoxel=substring(Info, index4, index5-1);
-	date=substring(Info, index5, index5+10);
+			microscope=substring(Info, 0, index1-1);
+			MA=substring(Info, index1, index2-1);
+			NA=substring(Info, index2, index3-1);
+			xyVoxel=substring(Info, index3, index4-1);
+			zVoxel=substring(Info, index4, index5-1);
+			date=substring(Info, index5, index5+10);
+		}
 	}
-	print(title, "\\Close");
-
 }
 
 // _______________________Get info on the setup at FMI_______________________
 
 Dialog.create("Image information");
-  Dialog.addChoice("Microscope:", newArray("SD1", "SD2", "Z1", "TILL5", "LSM510GE", "LSM510Meta", "LSMDuo"));
+  Dialog.addChoice("Microscope:", newArray("SD1", "SD2", "Z1", "TILL5", "IX70", "LSM710", "LSM700_Friedrich", "LSM700_Miescher"));
   Dialog.addNumber("Magnification:", MA);
   Dialog.addString("NA:", NA);
   Dialog.addChoice("Optovar:", newArray("No", "1.6", "2.5"));
@@ -68,8 +65,9 @@ PixelsizeChip=0;
 if (microscope=="SD1") PixelsizeChip=9170;
 if (microscope=="SD2") PixelsizeChip=10667;
 if (microscope=="TILL5") PixelsizeChip=6450;
+if (microscope=="IX70") PixelsizeChip=6450;
 if (microscope=="Z1") PixelsizeChip=6450;
-if (microscope=="SD1" || microscope=="SD2" || microscope=="TILL5" || microscope=="Z1") {
+if (microscope=="SD1" || microscope=="SD2" || microscope=="TILL5" || microscope=="Z1" || microscope=="IX70") {
 	xyVoxel=PixelsizeChip/MA/opto;
 	} else {
 	xyVoxel=getNumber("Pixelsize (nm):", xyVoxel);
@@ -77,16 +75,8 @@ if (microscope=="SD1" || microscope=="SD2" || microscope=="TILL5" || microscope=
 
 //________________________Save Info on setup____________________________
 
-File.open(path);
-open(path);
-print(title, "\\Update:");
-print(title, microscope+";"+MA+";"+NA+";"+xyVoxel+";"+zVoxel+";"+date);
-save(path);
-print(title, "\\Close");
-print("\\Clear");
-TitleLog="[Log]";
-print(TitleLog, "\\Close");
-
+Info = microscope+";"+MA+";"+NA+";"+xyVoxel+";"+zVoxel+";"+date;
+File.saveString(Info, path) ;
 
 //________________________Change image properties________________________
 
@@ -389,8 +379,3 @@ while (File.exists(PathTest)==1) {
 	}
 
 saveAs("tiff", path);
-
-
-
-
-
