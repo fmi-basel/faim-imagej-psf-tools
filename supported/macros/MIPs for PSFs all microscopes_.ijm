@@ -1,3 +1,4 @@
+S=fromCharCode(92);
 
 //_______________________Format date______________________________
 getDateAndTime(year, month, dayOfWeek, dayOfMonth, hour, minute, second, msec);
@@ -8,12 +9,12 @@ Monthadjust = "";
 if (month<10) {Monthadjust = "0";}
 today = ""+year+"-"+Monthadjust+month+"-"+Dayadjust+dayOfMonth;
 
-//_______________________Retrieve last saved Info________________________
+//_______________________Test location of user___________________________
 
-S=fromCharCode(92);
-dir="C:"+S;
-title="[LogFileImageJ.txt]";
-path=dir+"LogFileImageJ.txt";
+pathTest=S+S+"imagestore"+S+"FAIM"+S+"Maintenance_All microscopes"+S+"TestFMI_DoNotMove.txt";
+if (File.exists(pathTest) == 1) Loc="FMI";
+
+//_______________________Retrieve last saved Info________________________
 
 	microscope="microscope";
 	MA=100;
@@ -22,31 +23,64 @@ path=dir+"LogFileImageJ.txt";
 	zVoxel=200;
 	date=today;
 
+Directory = getDirectory("imagej");
+path = Directory+"LogFileImageJ.txt";
 if (File.exists(path)==1) {
-	open(path);
-	Info=getInfo("window.contents");
-	firstK=substring(Info, 0, 1);
-	if (Info!="" && firstK!="~") {
-	index1=indexOf(Info, ";")+1;
-	index2=indexOf(Info, ";", index1)+1;
-	index3=indexOf(Info, ";", index2)+1;
-	index4=indexOf(Info, ";", index3)+1;
-	index5=indexOf(Info, ";", index4)+1;
+    Info = File.openAsString(path);
+    if (Info!="") {
+        firstK=substring(Info, 0, 1);
+        if (firstK!="~") {
+            index1=indexOf(Info, ";")+1;
+            index2=indexOf(Info, ";", index1)+1;
+            index3=indexOf(Info, ";", index2)+1;
+            index4=indexOf(Info, ";", index3)+1;
+            index5=indexOf(Info, ";", index4)+1;
 
-	microscope=substring(Info, 0, index1-1);
-	MA=substring(Info, index1, index2-1);
-	NA=substring(Info, index2, index3-1);
-	xyVoxel=substring(Info, index3, index4-1);
-	zVoxel=substring(Info, index4, index5-1);
-	date=substring(Info, index5, index5+10);
-	}
-	print(title, "\\Close");
-
+            microscope=substring(Info, 0, index1-1);
+            MA=substring(Info, index1, index2-1);
+            NA=substring(Info, index2, index3-1);
+            xyVoxel=substring(Info, index3, index4-1);
+            zVoxel=substring(Info, index4, index5-1);
+            date=substring(Info, index5, index5+10);
+        }
+    }
 }
-
 
 // _______________________Get info on the setup_______________________
 
+if (Loc == "FMI") {
+Dialog.create("Image information");
+  Dialog.addChoice("Microscope:", newArray("SD1", "SD2", "Z1", "TILL5", "IX70", "LSM710", "LSM700_Friedrich", "LSM700_Miescher"));
+  Dialog.addNumber("Magnification:", MA);
+  Dialog.addString("NA:", NA);
+  Dialog.addChoice("Optovar:", newArray("No", "1.6", "2.5"));
+  Dialog.addNumber("Distance between stacks (nm):", zVoxel)
+  Dialog.addString("Date:", date);
+Dialog.show();
+  microscope = Dialog.getChoice();
+  MA = Dialog.getNumber();
+  NA = Dialog.getString();
+  optovar = Dialog.getChoice();
+  zVoxel=Dialog.getNumber();
+
+  date = Dialog.getString();
+
+opto=1;
+zVoxel=200;
+if (optovar=="1.6") opto=1.6;
+if (optovar=="2.5") opto=2.5;
+PixelsizeChip=0;
+if (microscope=="SD1") PixelsizeChip=9170;
+if (microscope=="SD2") PixelsizeChip=10667;
+if (microscope=="TILL5") PixelsizeChip=6450;
+if (microscope=="IX70") PixelsizeChip=6450;
+if (microscope=="Z1") PixelsizeChip=6450;
+if (microscope=="SD1" || microscope=="SD2" || microscope=="TILL5" || microscope=="Z1" || microscope=="IX70") {
+    xyVoxel=PixelsizeChip/MA/opto;
+    } else {
+    xyVoxel=getNumber("Pixelsize (nm):", xyVoxel);
+    }
+} else {
 Dialog.create("Image information");
   Dialog.addString("Microscope Name:", microscope);
   Dialog.addNumber("Magnification:", MA);
@@ -61,27 +95,22 @@ Dialog.show();
   xyVoxel = Dialog.getNumber();
   zVoxel=Dialog.getNumber();
   date = Dialog.getString();
+}
 
 //________________________Save Info on setup____________________________
 
-File.open(path);
-open(path);
-print(title, "\\Update:");
-print(title, microscope+";"+MA+";"+NA+";"+xyVoxel+";"+zVoxel+";"+date);
-save(path);
-print(title, "\\Close");
-print("\\Clear");
-TitleLog="[Log]";
-print(TitleLog, "\\Close");
+Info = microscope+";"+MA+";"+NA+";"+xyVoxel+";"+zVoxel+";"+date;
+File.saveString(Info, path);
 
 //________________________Change image properties________________________
 
-MainName=date+"_"+microscope+"_"+MA+"x_"+NA;
+ImageName = getInfo("image.filename");
+if (Loc == "FMI") ImageName = "";
+MainName=ImageName+"_"+date+"_"+microscope+"_"+MA+"x_"+NA;
 setVoxelSize(xyVoxel, xyVoxel, zVoxel, "nm");
 rename("Stack");
 
-
-// _______________Select the slice with highest intensity and crop_________________
+// _______________Select the slice with highest intensity and crop_________________
 
 selectWindow("Stack");
 run("Duplicate...", "title=Stack duplicate range=1-100");
@@ -332,7 +361,7 @@ close();
 selectWindow("Stack");
 close();
 
-MainName=MainName+" FWHMa "+d2s(FWHMa,0)+"nm - FWHMl "+d2s(FWHMl,0)+"nm";
+MainName=MainName+" FWHMa="+d2s(FWHMa,0)+"nm FWHMl="+d2s(FWHMl,0)+"nm";
 run("Images to Stack");
 rename(MainName);
 
@@ -361,6 +390,32 @@ if (NA=="1.45") {drawString("NA1.45 Oil FWHMl 181nm - FWHMa 649nm", 250, 340);}
 if (NA!="0.75" && NA!="0.8" && NA!="1.3" && NA!="1.4" && NA!="1.45" && NA!="0.95" && NA!="1.32") {
 	drawString("Values not determined yet", 250, 340);
 	}
+
+//________Save MIP at FMI__________________________
+
+if (Loc == "FMI") {
+path=S+S+"imagestore"+S+"FAIM"+S+"Maintenance_All microscopes"+S+MainName;
+PathTest=path+".tif";
+i=2;
+while (File.exists(PathTest)==1) {
+    path=path+"_2";
+    PathTest=path+".tif";
+    }
+
+saveAs("tiff", path);
+}
+
+//__________Save FWHM values_____________________
+InfoFWHM=ImageName+" "+date+" "+microscope+" "+MA+"x "+NA+" "+d2s(FWHMa,0)+" "+d2s(FWHMl,0);
+
+if (Loc == "FMI") {
+	path2 = S+S+"imagestore"+S+"FAIM"+S+"Maintenance_All microscopes"+S+"FWHMValues.txt";
+} else {
+	path = getDirectory("Choose a Directory");
+	path2=path+"FWHMValues.txt";
+}
+
+File.append(InfoFWHM, path2);
 
 
 
