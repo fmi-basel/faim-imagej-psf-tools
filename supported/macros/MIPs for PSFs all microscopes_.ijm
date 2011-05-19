@@ -1,4 +1,5 @@
-S=fromCharCode(92);
+
+S=fromCharCode(92);
 
 //_______________________Format date______________________________
 getDateAndTime(year, month, dayOfWeek, dayOfMonth, hour, minute, second, msec);
@@ -9,9 +10,10 @@ Monthadjust = "";
 if (month<10) {Monthadjust = "0";}
 today = ""+year+"-"+Monthadjust+month+"-"+Dayadjust+dayOfMonth;
 
-//_______________________Test location of user___________________________
+//_______________________Test location of user FMI vs. not FMI___________
 
 pathTest=S+S+"imagestore"+S+"FAIM"+S+"Maintenance_All microscopes"+S+"TestFMI_DoNotMove.txt";
+Loc = "";
 if (File.exists(pathTest) == 1) Loc="FMI";
 
 //_______________________Retrieve last saved Info________________________
@@ -22,6 +24,7 @@ if (File.exists(pathTest) == 1) Loc="FMI";
 	xyVoxel=70;
 	zVoxel=200;
 	date=today;
+	ImageName = getInfo("image.filename");
 
 Directory = getDirectory("imagej");
 path = Directory+"LogFileImageJ.txt";
@@ -45,6 +48,8 @@ if (File.exists(path)==1) {
         }
     }
 }
+
+
 
 // _______________________Get info on the setup_______________________
 
@@ -81,20 +86,34 @@ if (microscope=="SD1" || microscope=="SD2" || microscope=="TILL5" || microscope=
     xyVoxel=getNumber("Pixelsize (nm):", xyVoxel);
     }
 } else {
+
+
+Unit = newArray("uM", "nm");
+getVoxelSize(xyVoxel_Info, height, zVoxel_Info, unit_Info);
+xyVoxel=xyVoxel_Info;
+zVoxel=zVoxel_Info;
+
 Dialog.create("Image information");
   Dialog.addString("Microscope Name:", microscope);
   Dialog.addNumber("Magnification:", MA);
   Dialog.addString("NA:", NA);
   Dialog.addNumber("Pixel size (nm):", xyVoxel);
+  Dialog.addChoice("Unit", Unit, Unit[0]);
   Dialog.addNumber("Distance between stacks (nm):", zVoxel)
+  Dialog.addChoice("Unit", Unit, Unit[0]);
   Dialog.addString("Date:", date);
 Dialog.show();
   microscope = Dialog.getString();
   MA = Dialog.getNumber();
   NA = Dialog.getString();
   xyVoxel = Dialog.getNumber();
+  UnitStackXY = Dialog.getChoice();
   zVoxel=Dialog.getNumber();
+  UnitStackZ = Dialog.getChoice();
   date = Dialog.getString();
+
+if (UnitStackXY==Unit[0]) xyVoxel=xyVoxel*1000;
+if (UnitStackZ==Unit[0]) zVoxel=zVoxel*1000;
 }
 
 //________________________Save Info on setup____________________________
@@ -110,7 +129,8 @@ MainName=ImageName+"_"+date+"_"+microscope+"_"+MA+"x_"+NA;
 setVoxelSize(xyVoxel, xyVoxel, zVoxel, "nm");
 rename("Stack");
 
-// _______________Select the slice with highest intensity and crop_________________
+
+// _______________Select the slice with highest intensity and crop_________________
 
 selectWindow("Stack");
 run("Duplicate...", "title=Stack duplicate range=1-100");
@@ -391,7 +411,24 @@ if (NA!="0.75" && NA!="0.8" && NA!="1.3" && NA!="1.4" && NA!="1.45" && NA!="0.95
 	drawString("Values not determined yet", 250, 340);
 	}
 
-//________Save MIP at FMI__________________________
+//__________Save FWHM values_____________________
+InfoFWHM=ImageName+" "+date+" "+microscope+" "+MA+"x "+NA+" "+d2s(FWHMa,0)+" "+d2s(FWHMl,0);
+
+if (Loc == "FMI") {
+	path2 = S+S+"imagestore"+S+"FAIM"+S+"Maintenance_All microscopes"+S+"FWHMValues.txt";
+} else {
+	path = getDirectory("Choose a Directory");
+	path2=path+"FWHMValues.txt";
+}
+if (File.exists(path2) == 1) {
+	File.append(InfoFWHM, path2);
+} else {
+	headers = "ImageName date microscope MA NA FWHMa FWHMl";
+	File.append(headers, path2);
+	File.append(InfoFWHM, path2);
+}
+
+//________Save MIP __________________________
 
 if (Loc == "FMI") {
 path=S+S+"imagestore"+S+"FAIM"+S+"Maintenance_All microscopes"+S+MainName;
@@ -402,20 +439,12 @@ while (File.exists(PathTest)==1) {
     PathTest=path+".tif";
     }
 
-saveAs("tiff", path);
-}
-
-//__________Save FWHM values_____________________
-InfoFWHM=ImageName+" "+date+" "+microscope+" "+MA+"x "+NA+" "+d2s(FWHMa,0)+" "+d2s(FWHMl,0);
-
-if (Loc == "FMI") {
-	path2 = S+S+"imagestore"+S+"FAIM"+S+"Maintenance_All microscopes"+S+"FWHMValues.txt";
+	saveAs("tiff", path);
 } else {
-	path = getDirectory("Choose a Directory");
-	path2=path+"FWHMValues.txt";
+	saveAs("tiff", path);
 }
 
-File.append(InfoFWHM, path2);
+
 
 
 
