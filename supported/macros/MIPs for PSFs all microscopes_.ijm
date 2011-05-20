@@ -1,5 +1,4 @@
-
-S=fromCharCode(92);
+S=fromCharCode(92);
 
 //_______________________Format date______________________________
 getDateAndTime(year, month, dayOfWeek, dayOfMonth, hour, minute, second, msec);
@@ -49,57 +48,22 @@ if (File.exists(path)==1) {
     }
 }
 
-
-
 // _______________________Get info on the setup_______________________
-
-if (Loc == "FMI") {
-Dialog.create("Image information");
-  Dialog.addChoice("Microscope:", newArray("SD1", "SD2", "Z1", "TILL5", "IX70", "LSM710", "LSM700_Friedrich", "LSM700_Miescher"));
-  Dialog.addNumber("Magnification:", MA);
-  Dialog.addString("NA:", NA);
-  Dialog.addChoice("Optovar:", newArray("No", "1.6", "2.5"));
-  Dialog.addNumber("Distance between stacks (nm):", zVoxel)
-  Dialog.addString("Date:", date);
-Dialog.show();
-  microscope = Dialog.getChoice();
-  MA = Dialog.getNumber();
-  NA = Dialog.getString();
-  optovar = Dialog.getChoice();
-  zVoxel=Dialog.getNumber();
-
-  date = Dialog.getString();
-
-opto=1;
-zVoxel=200;
-if (optovar=="1.6") opto=1.6;
-if (optovar=="2.5") opto=2.5;
-PixelsizeChip=0;
-if (microscope=="SD1") PixelsizeChip=9170;
-if (microscope=="SD2") PixelsizeChip=10667;
-if (microscope=="TILL5") PixelsizeChip=6450;
-if (microscope=="IX70") PixelsizeChip=6450;
-if (microscope=="Z1") PixelsizeChip=6450;
-if (microscope=="SD1" || microscope=="SD2" || microscope=="TILL5" || microscope=="Z1" || microscope=="IX70") {
-    xyVoxel=PixelsizeChip/MA/opto;
-    } else {
-    xyVoxel=getNumber("Pixelsize (nm):", xyVoxel);
-    }
-} else {
-
-
-Unit = newArray("uM", "nm");
+Unit = newArray("uM", "nm");
 getVoxelSize(xyVoxel_Info, height, zVoxel_Info, unit_Info);
+
+//if (xyVoxel!=0 && xyVoxel_Info!=1) 
 xyVoxel=xyVoxel_Info;
+//if (zVoxel!=0 && zVoxel_Info!=1) 
 zVoxel=zVoxel_Info;
 
 Dialog.create("Image information");
   Dialog.addString("Microscope Name:", microscope);
   Dialog.addNumber("Magnification:", MA);
   Dialog.addString("NA:", NA);
-  Dialog.addNumber("Pixel size (nm):", xyVoxel);
+  Dialog.addNumber("Pixel size :", xyVoxel);
   Dialog.addChoice("Unit", Unit, Unit[0]);
-  Dialog.addNumber("Distance between stacks (nm):", zVoxel)
+  Dialog.addNumber("Distance between stacks :", zVoxel)
   Dialog.addChoice("Unit", Unit, Unit[0]);
   Dialog.addString("Date:", date);
 Dialog.show();
@@ -114,7 +78,7 @@ Dialog.show();
 
 if (UnitStackXY==Unit[0]) xyVoxel=xyVoxel*1000;
 if (UnitStackZ==Unit[0]) zVoxel=zVoxel*1000;
-}
+
 
 //________________________Save Info on setup____________________________
 
@@ -129,8 +93,7 @@ MainName=ImageName+"_"+date+"_"+microscope+"_"+MA+"x_"+NA;
 setVoxelSize(xyVoxel, xyVoxel, zVoxel, "nm");
 rename("Stack");
 
-
-// _______________Select the slice with highest intensity and crop_________________
+// _______________Select the slice with highest intensity and crop_________________
 
 selectWindow("Stack");
 run("Duplicate...", "title=Stack duplicate range=1-100");
@@ -441,6 +404,12 @@ while (File.exists(PathTest)==1) {
 
 	saveAs("tiff", path);
 } else {
+path=path+MainName;
+PathTest=path+".tif";
+while (File.exists(PathTest)==1) {
+    path=path+"_2";
+    PathTest=path+".tif";
+    }
 	saveAs("tiff", path);
 }
 
