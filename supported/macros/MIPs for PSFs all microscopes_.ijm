@@ -371,7 +371,9 @@ if (NA=="0.8") {
 	}
 if (NA=="0.75") {drawString("NA0.75 Air FWHMl 350nm - FWHMa 1598nm", 250, 340);}
 if (NA=="1.45") {drawString("NA1.45 Oil FWHMl 181nm - FWHMa 649nm", 250, 340);}
-if (NA!="0.75" && NA!="0.8" && NA!="1.3" && NA!="1.4" && NA!="1.45" && NA!="1.2" && NA!="0.95" && NA!="1.32") {
+if (NA=="1.25") {drawString("NA1.25 Oil FWHMl 210nm - FWHMa 873nm", 250, 340);}
+
+if (NA!="0.75" && NA!="0.8" && NA!="1.3" && NA!="1.4" && NA!="1.45" && NA!="1.25" && NA!="1.2" && NA!="0.95" && NA!="1.32") {
 	drawString("Values not determined yet", 250, 340);
 	}
 
