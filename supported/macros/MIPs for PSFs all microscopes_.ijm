@@ -227,7 +227,7 @@ run("Canvas Size...", "width="+ProjectWidth+" height="+ProjectWidth+" position=B
 run("Image Calculator...", "image1=Project operation=Add image2=xProj");
 selectWindow("Project");
 run("Image Calculator...", "image1=Project operation=Add image2=yProj");
-run("Size...", "width=550 height=550 constrain interpolation");
+run("Size...", "width=550 height=550 constrain interpolation=None");
 
 selectWindow("xProj");
 close();
