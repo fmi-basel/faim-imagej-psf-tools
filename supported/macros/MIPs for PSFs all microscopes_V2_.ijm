@@ -1,4 +1,7 @@
-S=fromCharCode(92);
+S=fromCharCode(92);
+Stack.getStatistics(voxelCount, mean, min, max, stdDev);
+setMinAndMax(min, max);
+ImageSource = getTitle();
 
 
 //_______________________Functions________________________________
@@ -22,7 +25,7 @@ for (i=round(Xloc-Xrange/2); i<round(Xloc+Xrange/2); i++) {
 			x2=i; y2=j;
 		}}}
 setMinAndMax(Minstack, Maxstack);
-FindMaximaArray = newArray (x2, y2, OptSlice);	
+FindMaximaArray = newArray (x2, y2, OptSlice);
 return FindMaximaArray;
 }
 
@@ -73,7 +76,11 @@ if (File.exists(path)==1) {
 	index9=indexOf(Info, ";", index8)+1;
 	index10=indexOf(Info, ";", index9)+1;
 	index11=indexOf(Info, ";", index10)+1;
-	                     
+	index12=indexOf(Info, ";", index11)+1;
+	index13=indexOf(Info, ";", index12)+1;
+	index14=indexOf(Info, ";", index13)+1;
+	index15=indexOf(Info, ";", index14)+1;
+		                     
         microscope=substring(Info, 0, index1-1);
         MA=substring(Info, index1, index2-1);
         NA=substring(Info, index2, index3-1);
@@ -86,11 +93,19 @@ if (File.exists(path)==1) {
         choiceClose=substring(Info, index9, index9+1);
         choiceValues=substring(Info, index10, index10+1);
         choiceBead=substring(Info, index11, index11+8);
+        Xrange=substring(Info, index12, index13-1);
+        Yrange=substring(Info, index13, index14-1);
+        Zrange=substring(Info, index14, index15-1);
+        
         }
     }
 }
-
-
+// _______________________Looping_____________________________________
+/*
+Looping=0;
+while (Looping==0) {
+selectWindow(ImageSource);
+*/
 // _______________________Get info on the setup_______________________
 
 getVoxelSize(xyVoxel_Info, height, zVoxel_Info, unit_Info);
@@ -132,28 +147,36 @@ if (UnitStackZ==Unit[0]) zVoxel=zVoxel*1000;
 if (choice==false) {
   CheckBox = newArray("a pixel ", "a region");
   Dialog.create("Type of selection");
-  Dialog.addMessage("The bead will be selected by the user by right-clicking on it.\nThe pixel clicked by the user can be:\n   The center of the bead.\n   The center of a small region (12x12 pixel in 8 adjacent planes) where the macro looks for a local maximum.");
+  Dialog.addMessage("The bead will be selected by the user by right-clicking on it.\nThe pixel clicked by the user can be:\n- The center of the bead.\n- The center of a small region (12x12 pixel in 8 adjacent planes) where the macro looks for a local maximum.");
+  Dialog.setInsets(0, 40, 0);
   Dialog.addChoice("The mouse points to", CheckBox, choiceBead);
+  Dialog.addMessage("If the mouse points to a region, please indicate:");
+  Dialog.setInsets(0, 40, 0);
+  Dialog.addNumber("Search range for XY (in pixels):", Xrange);
+  Dialog.setInsets(0, 40, 0);
+  Dialog.addNumber("Search range for Z (in planes):", Zrange);
   Dialog.show();
   choiceBead = Dialog.getChoice();
+  Xrange = Dialog.getNumber();  Yrange = Xrange;
+  Zrange = Dialog.getNumber();
 }
 
 
 //________________________Save Info on setup____________________________
 
-Info = microscope+";"+MA+";"+NA+";"+xyVoxel+";"+zVoxel+";"+date+";"+UnitXY+";"+UnitZ+";"+choice+";"+choiceClose+";"+choiceValues+";"+choiceBead;
+Info = microscope+";"+MA+";"+NA+";"+xyVoxel+";"+zVoxel+";"+date+";"+UnitXY+";"+UnitZ+";"+choice+";"+choiceClose+";"+choiceValues+";"+choiceBead+";"+Xrange+";"+Yrange+";"+Zrange+";";
 File.saveString(Info, path);
 
 
 //________________________Change image properties________________________
 
-if (Loc == "FMI") ImageName = "";
 ImageName = getInfo("image.filename");
-ImageSource = getTitle();
-MainName=ImageName+"_"+date+"_"+microscope+"_"+MA+"x_"+NA;
+MainName=ImageSource+"_"+date+"_"+microscope+"_"+MA+"x_"+NA;
 setVoxelSize(xyVoxel, xyVoxel, zVoxel, "nm");
+Stack.getPosition(channel, slice, frame);
 run("Duplicate...", "title=40x4crop-1.tif duplicate range=1-100");
 rename("Stack");
+Stack.setSlice(slice);
 if (choiceClose==1) {
 	selectWindow(ImageSource);
 	close();
@@ -166,14 +189,15 @@ Stack.getStatistics(voxelCount, mean, min, max, stdDev);
 setMinAndMax(min, max);
 if (choice==false) {
 		boucle=true;
+		flags=1;
 		while (boucle==true) {
-		getCursorLoc(x, y, z, flags);
+		getCursorLoc(xLoc, yLoc, zLoc, flags);
 		if (flags==4) boucle=false;
 		}
 		if (choiceBead == "a pixel ") {	
-		x2=x; y2=y; OptSlice=z+1;
+		x2=xLoc; y2=yLoc; OptSlice=zLoc+1;
 		} else {
-		MaxPixel = FindMaxima(z+1, 4, x, y, 12, 12);
+		MaxPixel = FindMaxima(zLoc+1, Zrange, xLoc, yLoc, Xrange, Yrange);
 		x2 = MaxPixel[0]; y2 = MaxPixel[1]; OptSlice = MaxPixel[2];
 		}
 	} else {
@@ -433,8 +457,8 @@ if (choiceValues==1) {
 		}
 }
 //__________Save FWHM values_____________________
-InfoFWHM=ImageName+" "+date+" "+microscope+" "+MA+"x "+NA+" "+d2s(FWHMa,0)+" "+d2s(FWHMl,0)+" "+d2s(FWHMly,0);
-
+//InfoFWHM=ImageName+" "+date+" "+microscope+" "+MA+"x "+NA+" "+d2s(FWHMa,0)+" "+d2s(FWHMl,0)+" "+d2s(FWHMly,0);
+InfoFWHM=fromCharCode(10)+ImageName+";"+date+";"+microscope+";"+MA+"x;"+NA+";"+MaxPixel[0]+";"+MaxPixel[1]+";"+MaxPixel[2]+";"+d2s(FWHMa,0)+";"+d2s(FWHMl,0)+";"+d2s(FWHMly,0);
 if (Loc == "FMI") {
 	path2 = S+S+"imagestore"+S+"FAIM"+S+"Maintenance_All microscopes"+S+"FWHMValues.txt";
 } else {
@@ -444,7 +468,7 @@ if (Loc == "FMI") {
 if (File.exists(path2) == 1) {
 	File.append(InfoFWHM, path2);
 } else {
-	headers = "ImageName date microscope MA NA FWHMa FWHMl";
+	headers = "ImageName;date;microscope;MA;NA;X;Y;Plane;FWHMa;FWHMl_X;FWHMl_Y";
 	File.append(headers, path2);
 	File.append(InfoFWHM, path2);
 }
@@ -453,20 +477,17 @@ if (File.exists(path2) == 1) {
 
 if (Loc == "FMI") {
 path=S+S+"imagestore"+S+"FAIM"+S+"Maintenance_All microscopes"+S+MainName;
-PathTest=path+".tif";
+} else {path=path+MainName;}
+//PathTest=path+".tif";
 i=2;
-while (File.exists(PathTest)==1) {
-    path=path+"_2";
-    PathTest=path+".tif";
+while (File.exists(path+".tif")==1) {
+    path=S+S+"imagestore"+S+"FAIM"+S+"Maintenance_All microscopes"+S+MainName+"_"+i;
+    i = i + 1;
+//    PathTest=path+".tif";
     }
+	saveAs("tiff", path+".tif");
 
-	saveAs("tiff", path);
-} else {
-path=path+MainName;
-PathTest=path+".tif";
-while (File.exists(PathTest)==1) {
-    path=path+"_2";
-    PathTest=path+".tif";
-    }
-	saveAs("tiff", path);
-}
+
+
+
+//}
