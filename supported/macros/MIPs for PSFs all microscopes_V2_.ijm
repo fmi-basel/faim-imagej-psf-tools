@@ -1,4 +1,4 @@
-S=fromCharCode(92);
+S = File.separator;
 getMinAndMax(hMin, hMax);
 ImageSource = getTitle();
 
@@ -461,7 +461,7 @@ if (choiceValues==1) {
 		}
 }
 //__________Save FWHM values_____________________
-//InfoFWHM=ImageName+" "+date+" "+microscope+" "+MA+"x "+NA+" "+d2s(FWHMa,0)+" "+d2s(FWHMl,0)+" "+d2s(FWHMly,0);
+
 InfoFWHM=fromCharCode(10)+ImageName+";"+date+";"+microscope+";"+MA+"x;"+NA+";"+MaxPixel[0]+";"+MaxPixel[1]+";"+MaxPixel[2]+";"+d2s(FWHMa,0)+";"+d2s(FWHMl,0)+";"+d2s(FWHMly,0)+";"+LineThickness;
 if (Loc == "FMI") {
 	path2 = S+S+"imagestore"+S+"FAIM"+S+"Maintenance_All microscopes"+S+"FWHMValues.txt";
@@ -482,16 +482,11 @@ if (File.exists(path2) == 1) {
 if (Loc == "FMI") {
 path=S+S+"imagestore"+S+"FAIM"+S+"Maintenance_All microscopes"+S+MainName;
 } else {path=path+MainName;}
-//PathTest=path+".tif";
 i=2;
 while (File.exists(path+".tif")==1) {
     path=S+S+"imagestore"+S+"FAIM"+S+"Maintenance_All microscopes"+S+MainName+"_"+i;
     i = i + 1;
-//    PathTest=path+".tif";
     }
 	saveAs("tiff", path+".tif");
-
-
-
 
 //}
