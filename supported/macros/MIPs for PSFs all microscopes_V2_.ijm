@@ -1,6 +1,5 @@
 S=fromCharCode(92);
-Stack.getStatistics(voxelCount, mean, min, max, stdDev);
-setMinAndMax(min, max);
+getMinAndMax(hMin, hMax);
 ImageSource = getTitle();
 
 
@@ -57,6 +56,12 @@ date=today;
 ImageName = getInfo("image.filename");
 choice = 1;
 choiceClose = 1;
+choiceValues = 1;
+LineThickness = 1;
+choiceBead = 1;
+Xrange = 12;
+Yrange = 12;
+Zrange = 12;
 
 Directory = getDirectory("imagej");
 path = Directory+"LogFileImageJ.txt";
@@ -80,6 +85,7 @@ if (File.exists(path)==1) {
 	index13=indexOf(Info, ";", index12)+1;
 	index14=indexOf(Info, ";", index13)+1;
 	index15=indexOf(Info, ";", index14)+1;
+	index16=indexOf(Info, ";", index15)+1;
 		                     
         microscope=substring(Info, 0, index1-1);
         MA=substring(Info, index1, index2-1);
@@ -96,6 +102,7 @@ if (File.exists(path)==1) {
         Xrange=substring(Info, index12, index13-1);
         Yrange=substring(Info, index13, index14-1);
         Zrange=substring(Info, index14, index15-1);
+        LineThickness=substring(Info, index15, index16-1);
         
         }
     }
@@ -127,6 +134,7 @@ Dialog.create("Image information");
   Dialog.addCheckbox("Automatic selection of bead", choice);
   Dialog.addCheckbox("Close source image when done", choiceClose);
   Dialog.addCheckbox("Display theoretical values", choiceValues);
+  Dialog.addNumber("FWHMl estimation over (pixels):", LineThickness);
   
 Dialog.show();
   microscope = Dialog.getString();
@@ -140,7 +148,8 @@ Dialog.show();
   choice = Dialog.getCheckbox();
   choiceClose = Dialog.getCheckbox();
   choiceValues = Dialog.getCheckbox();
- 
+  LineThickness = Dialog.getNumber();
+
 if (UnitStackXY==Unit[0]) xyVoxel=xyVoxel*1000;
 if (UnitStackZ==Unit[0]) zVoxel=zVoxel*1000;
 
@@ -164,7 +173,7 @@ if (choice==false) {
 
 //________________________Save Info on setup____________________________
 
-Info = microscope+";"+MA+";"+NA+";"+xyVoxel+";"+zVoxel+";"+date+";"+UnitXY+";"+UnitZ+";"+choice+";"+choiceClose+";"+choiceValues+";"+choiceBead+";"+Xrange+";"+Yrange+";"+Zrange+";";
+Info = microscope+";"+MA+";"+NA+";"+xyVoxel+";"+zVoxel+";"+date+";"+UnitXY+";"+UnitZ+";"+choice+";"+choiceClose+";"+choiceValues+";"+choiceBead+";"+Xrange+";"+Yrange+";"+Zrange+";"+LineThickness+"; ; ;";
 File.saveString(Info, path);
 
 
@@ -174,9 +183,10 @@ ImageName = getInfo("image.filename");
 MainName=ImageSource+"_"+date+"_"+microscope+"_"+MA+"x_"+NA;
 setVoxelSize(xyVoxel, xyVoxel, zVoxel, "nm");
 Stack.getPosition(channel, slice, frame);
-run("Duplicate...", "title=40x4crop-1.tif duplicate range=1-100");
+run("Duplicate...", "duplicate range=1-"+nSlices);
 rename("Stack");
 Stack.setSlice(slice);
+setMinAndMax(hMin,hMax);
 if (choiceClose==1) {
 	selectWindow(ImageSource);
 	close();
@@ -185,8 +195,7 @@ if (choiceClose==1) {
 // _______________Select the slice with highest intensity and crop_________________
 
 selectWindow("Stack");
-Stack.getStatistics(voxelCount, mean, min, max, stdDev);
-setMinAndMax(min, max);
+setMinAndMax(hMin, hMax);
 if (choice==false) {
 		boucle=true;
 		flags=1;
@@ -212,10 +221,8 @@ halfROIsize = round(ROIsize/2);
 makeRectangle(x2-halfROIsize, y2-halfROIsize, ROIsize, ROIsize);
 run("Crop");
 
-if ((x2>=halfROIsize) && (y2>=halfROIsize)) {
-	x2=halfROIsize;
-	y2=halfROIsize;
-	}
+if (x2>=halfROIsize) {	x2=halfROIsize;	}
+if (y2>=halfROIsize) {	y2=halfROIsize;	}
 
 ROIsizeBG = round(ROIsize/10);
 makeRectangle(ROIsizeBG, ROIsizeBG, ROIsizeBG, ROIsizeBG);
@@ -307,6 +314,7 @@ run("8-bit");
 run("RGB Color");
 
 
+
 // _______________________FWHM axial_______________________ ;
 
 selectWindow("Stack");
@@ -363,10 +371,12 @@ y = newArray(17);
 yy = newArray(17);
 
 for (i=0; i<17; i++) {
-	y[i] = getPixel(x2-8+i,y2);
-	yy[i] = getPixel(x2,y2-8+i);
+	y[i]=0; yy[i]=0;
+	for (k=-floor(LineThickness/2); k<-floor(LineThickness/2)+LineThickness; k++) {
+	y[i] = y[i] + getPixel(x2-8+i,y2+k)/LineThickness;
+	yy[i] = yy[i] + getPixel(x2+k,y2-8+i)/LineThickness;
 	}
-
+}
 Fit.doFit("Gaussian", x, y); a=Fit.p(0); b=Fit.p(1); c=Fit.p(2); d=Fit.p(3);
 Fit.doFit("Gaussian", x, yy); ay=Fit.p(0); by=Fit.p(1); cy=Fit.p(2); dy=Fit.p(3);
 
@@ -458,7 +468,7 @@ if (choiceValues==1) {
 }
 //__________Save FWHM values_____________________
 //InfoFWHM=ImageName+" "+date+" "+microscope+" "+MA+"x "+NA+" "+d2s(FWHMa,0)+" "+d2s(FWHMl,0)+" "+d2s(FWHMly,0);
-InfoFWHM=fromCharCode(10)+ImageName+";"+date+";"+microscope+";"+MA+"x;"+NA+";"+MaxPixel[0]+";"+MaxPixel[1]+";"+MaxPixel[2]+";"+d2s(FWHMa,0)+";"+d2s(FWHMl,0)+";"+d2s(FWHMly,0);
+InfoFWHM=fromCharCode(10)+ImageName+";"+date+";"+microscope+";"+MA+"x;"+NA+";"+MaxPixel[0]+";"+MaxPixel[1]+";"+MaxPixel[2]+";"+d2s(FWHMa,0)+";"+d2s(FWHMl,0)+";"+d2s(FWHMly,0)+";"+LineThickness;
 if (Loc == "FMI") {
 	path2 = S+S+"imagestore"+S+"FAIM"+S+"Maintenance_All microscopes"+S+"FWHMValues.txt";
 } else {
@@ -468,7 +478,7 @@ if (Loc == "FMI") {
 if (File.exists(path2) == 1) {
 	File.append(InfoFWHM, path2);
 } else {
-	headers = "ImageName;date;microscope;MA;NA;X;Y;Plane;FWHMa;FWHMl_X;FWHMl_Y";
+	headers = "ImageName;date;microscope;MA;NA;X;Y;Plane;FWHMa;FWHMl_X;FWHMl_Y;LineThickness";
 	File.append(headers, path2);
 	File.append(InfoFWHM, path2);
 }
