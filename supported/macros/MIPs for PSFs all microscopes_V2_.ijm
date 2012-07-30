@@ -196,6 +196,7 @@ if (choiceClose==1) {
 
 selectWindow("Stack");
 setMinAndMax(hMin, hMax);
+MaxPixel = newArray(3);
 if (choice==false) {
 		boucle=true;
 		flags=1;
@@ -205,6 +206,7 @@ if (choice==false) {
 		}
 		if (choiceBead == "a pixel ") {	
 		x2=xLoc; y2=yLoc; OptSlice=zLoc+1;
+		MaxPixel[0] = x2; MaxPixel[1] = y2; MaxPixel[2] = OptSlice;
 		} else {
 		MaxPixel = FindMaxima(zLoc+1, Zrange, xLoc, yLoc, Xrange, Yrange);
 		x2 = MaxPixel[0]; y2 = MaxPixel[1]; OptSlice = MaxPixel[2];
@@ -468,7 +470,7 @@ if (choiceValues==1) {
 }
 //__________Save FWHM values_____________________
 //InfoFWHM=ImageName+" "+date+" "+microscope+" "+MA+"x "+NA+" "+d2s(FWHMa,0)+" "+d2s(FWHMl,0)+" "+d2s(FWHMly,0);
-InfoFWHM=fromCharCode(10)+ImageName+";"+date+";"+microscope+";"+MA+"x;"+NA+";"+MaxPixel[0]+";"+MaxPixel[1]+";"+MaxPixel[2]+";"+d2s(FWHMa,0)+";"+d2s(FWHMl,0)+";"+d2s(FWHMly,0)+";"+LineThickness;
+InfoFWHM=fromCharCode(10)+ImageName+";"+date+";"+microscope+";"+MA+"x;"+NA+";"+MaxPixel[0]+";"+MaxPixel[1]+";"+MaxPixel[2]+";"+d2s(FWHMa,0)+";"+d2s(FWHMl,0)+";"+d2s(FWHMly,0)+";"+LineThickness+"; ; ;";
 if (Loc == "FMI") {
 	path2 = S+S+"imagestore"+S+"FAIM"+S+"Maintenance_All microscopes"+S+"FWHMValues.txt";
 } else {
