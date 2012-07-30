@@ -470,7 +470,7 @@ if (choiceValues==1) {
 }
 //__________Save FWHM values_____________________
 //InfoFWHM=ImageName+" "+date+" "+microscope+" "+MA+"x "+NA+" "+d2s(FWHMa,0)+" "+d2s(FWHMl,0)+" "+d2s(FWHMly,0);
-InfoFWHM=fromCharCode(10)+ImageName+";"+date+";"+microscope+";"+MA+"x;"+NA+";"+MaxPixel[0]+";"+MaxPixel[1]+";"+MaxPixel[2]+";"+d2s(FWHMa,0)+";"+d2s(FWHMl,0)+";"+d2s(FWHMly,0)+";"+LineThickness+"; ; ;";
+InfoFWHM=fromCharCode(10)+ImageName+";"+date+";"+microscope+";"+MA+"x;"+NA+";"+MaxPixel[0]+";"+MaxPixel[1]+";"+MaxPixel[2]+";"+d2s(FWHMa,0)+";"+d2s(FWHMl,0)+";"+d2s(FWHMly,0)+";"+LineThickness+"; ; ; ; ; ; ; ;";
 if (Loc == "FMI") {
 	path2 = S+S+"imagestore"+S+"FAIM"+S+"Maintenance_All microscopes"+S+"FWHMValues.txt";
 } else {
