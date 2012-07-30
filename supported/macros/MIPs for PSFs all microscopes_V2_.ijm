@@ -65,44 +65,36 @@ Zrange = 12;
 
 Directory = getDirectory("imagej");
 path = Directory+"LogFileImageJ.txt";
+index = newArray(30); index[0] = 0;
+indexCount = 1; position = 0;
 if (File.exists(path)==1) {
     Info = File.openAsString(path);
     if (Info!="") {
         firstK=substring(Info, 0, 1);
         if (firstK!="~") {
-        index1=indexOf(Info, ";")+1;
-        index2=indexOf(Info, ";", index1)+1;
-        index3=indexOf(Info, ";", index2)+1;
-        index4=indexOf(Info, ";", index3)+1;
-        index5=indexOf(Info, ";", index4)+1;
-        index6=indexOf(Info, ";", index5)+1;
-	index7=indexOf(Info, ";", index6)+1;
-	index8=indexOf(Info, ";", index7)+1;
-	index9=indexOf(Info, ";", index8)+1;
-	index10=indexOf(Info, ";", index9)+1;
-	index11=indexOf(Info, ";", index10)+1;
-	index12=indexOf(Info, ";", index11)+1;
-	index13=indexOf(Info, ";", index12)+1;
-	index14=indexOf(Info, ";", index13)+1;
-	index15=indexOf(Info, ";", index14)+1;
-	index16=indexOf(Info, ";", index15)+1;
-		                     
-        microscope=substring(Info, 0, index1-1);
-        MA=substring(Info, index1, index2-1);
-        NA=substring(Info, index2, index3-1);
-        xyVoxel=substring(Info, index3, index4-1);
-        zVoxel=substring(Info, index4, index5-1);
-        date=substring(Info, index5, index5+10);
-        UnitXY=substring(Info, index6, index7-1);
-        UnitZ=substring(Info, index7, index7+1);
-        choice=substring(Info, index8, index8+1);
-        choiceClose=substring(Info, index9, index9+1);
-        choiceValues=substring(Info, index10, index10+1);
-        choiceBead=substring(Info, index11, index11+8);
-        Xrange=substring(Info, index12, index13-1);
-        Yrange=substring(Info, index13, index14-1);
-        Zrange=substring(Info, index14, index15-1);
-        LineThickness=substring(Info, index15, index16-1);
+        	while (position<lengthOf(Info)-1) {
+        		position = indexOf(Info, ";", index[indexCount-1])+1;
+        		index[indexCount]= position;
+        		indexCount = indexCount + 1;
+        	}
+	if (indexCount<17) exit("You must delete the old LogFileImageJ.txt\nin the Fiji folder");
+               
+        microscope=substring(Info, 0, index[1]-1);
+        MA=substring(Info, index[1], index[2]-1);
+        NA=substring(Info, index[2], index[3]-1);
+        xyVoxel=substring(Info, index[3], index[4]-1);
+        zVoxel=substring(Info, index[4], index[5]-1);
+        date=substring(Info, index[5], index[5]+10);
+        UnitXY=substring(Info, index[6], index[7]-1);
+        UnitZ=substring(Info, index[7], index[7]+1);
+        choice=substring(Info, index[8], index[8]+1);
+        choiceClose=substring(Info, index[9], index[9]+1);
+        choiceValues=substring(Info, index[10], index[10]+1);
+        choiceBead=substring(Info, index[11], index[11]+8);
+        Xrange=substring(Info, index[12], index[13]-1);
+        Yrange=substring(Info, index[13], index[14]-1);
+        Zrange=substring(Info, index[14], index[15]-1);
+        LineThickness=substring(Info, index[15], index[16]-1);
         
         }
     }
@@ -173,7 +165,7 @@ if (choice==false) {
 
 //________________________Save Info on setup____________________________
 
-Info = microscope+";"+MA+";"+NA+";"+xyVoxel+";"+zVoxel+";"+date+";"+UnitXY+";"+UnitZ+";"+choice+";"+choiceClose+";"+choiceValues+";"+choiceBead+";"+Xrange+";"+Yrange+";"+Zrange+";"+LineThickness+"; ; ;";
+Info = microscope+";"+MA+";"+NA+";"+xyVoxel+";"+zVoxel+";"+date+";"+UnitXY+";"+UnitZ+";"+choice+";"+choiceClose+";"+choiceValues+";"+choiceBead+";"+Xrange+";"+Yrange+";"+Zrange+";"+LineThickness+"; ; ; ; ; ; ; ; ;";
 File.saveString(Info, path);
 
 
@@ -470,7 +462,7 @@ if (choiceValues==1) {
 }
 //__________Save FWHM values_____________________
 //InfoFWHM=ImageName+" "+date+" "+microscope+" "+MA+"x "+NA+" "+d2s(FWHMa,0)+" "+d2s(FWHMl,0)+" "+d2s(FWHMly,0);
-InfoFWHM=fromCharCode(10)+ImageName+";"+date+";"+microscope+";"+MA+"x;"+NA+";"+MaxPixel[0]+";"+MaxPixel[1]+";"+MaxPixel[2]+";"+d2s(FWHMa,0)+";"+d2s(FWHMl,0)+";"+d2s(FWHMly,0)+";"+LineThickness+"; ; ; ; ; ; ; ;";
+InfoFWHM=fromCharCode(10)+ImageName+";"+date+";"+microscope+";"+MA+"x;"+NA+";"+MaxPixel[0]+";"+MaxPixel[1]+";"+MaxPixel[2]+";"+d2s(FWHMa,0)+";"+d2s(FWHMl,0)+";"+d2s(FWHMly,0)+";"+LineThickness;
 if (Loc == "FMI") {
 	path2 = S+S+"imagestore"+S+"FAIM"+S+"Maintenance_All microscopes"+S+"FWHMValues.txt";
 } else {
