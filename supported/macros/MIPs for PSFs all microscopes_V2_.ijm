@@ -1,7 +1,7 @@
 S = File.separator;
 getMinAndMax(hMin, hMax);
 ImageSource = getTitle();
-
+setTool("zoom");
 
 //_______________________Functions________________________________
 
