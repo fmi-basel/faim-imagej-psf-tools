@@ -127,6 +127,7 @@ Dialog.create("Image information");
   Dialog.addCheckbox("Close source image when done", choiceClose);
   Dialog.addCheckbox("Display theoretical values", choiceValues);
   Dialog.addNumber("FWHMl estimation over (pixels):", LineThickness);
+  Dialog.addMessage("Credits: Laurent Gelman, Friedrich Miescher Institut, Basel");
   
 Dialog.show();
   microscope = Dialog.getString();
