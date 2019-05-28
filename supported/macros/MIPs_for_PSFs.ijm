@@ -247,7 +247,6 @@ while (nSlices<100) {
 
 OptSlice=50;
 
-
 // _______________________Projections_______________________
 
 selectWindow("Stack");
@@ -351,8 +350,10 @@ Plot.setLimits(-4000, 4000, 0, MaxGraph*1.1);
 Plot.add("circles", XplotLatReal, YplotLatReal);
 Plot.addText("FWHM axial ="+d2s(FWHMa,0)+"nm", 0, 0);
 Plot.show();
-run("Size...", "width=480 height=275 constrain interpolation=Bicubic");
+Plot.setFrameSize(460, 220);
+run("Canvas Size...", "width=550 height=275 position=Bottom-Center");
 run("Canvas Size...", "width=550 height=550 position=Bottom-Center zero");
+
 
 
 // _______________________FWHM lateral_______________________ ;
@@ -412,7 +413,8 @@ Plot.setColor("black");
 Plot.add("circles", XplotLatReal, YplotLatReal);
 Plot.addText("FWHM lateral X ="+d2s(FWHMl,0)+"nm; FWHM lateral Y ="+d2s(FWHMly,0)+"nm; Average ="+d2s((FWHMl+FWHMly)/2,0)+"nm", 0, 0);
 Plot.show();
-run("Size...", "width=480 height=275 constrain interpolation=Bicubic");
+Plot.setFrameSize(460, 220);
+run("Canvas Size...", "width=550 height=275 position=Top-Center");
 run("Canvas Size...", "width=550 height=550 position=Top-Center zero");
 run("Image Calculator...", "image1=[FWHM lateral] operation=Add image2=[FWHM axial]");
 run("Canvas Size...", "width=550 height=550 position=Center");
