@@ -37,7 +37,7 @@ if (dayOfMonth<10) {Dayadjust = "0";}
 month=month+1;
 Monthadjust = "";
 if (month<10) {Monthadjust = "0";}
-today = ""+year+"-"+Monthadjust+month+"-"+Dayadjust+dayOfMonth;
+today = ""+Dayadjust+dayOfMonth+"-"+Monthadjust+month+"-"+year;
 
 
 //_______________________Test location of user FMI vs. not FMI___________
@@ -122,7 +122,7 @@ Dialog.create("Image information");
   Dialog.addChoice("Unit", Unit, unit_Info);
   Dialog.addNumber("Distance between stacks :", zVoxel)
   Dialog.addChoice("Unit", Unit, unit_Info);
-  Dialog.addString("Date:", date);
+  Dialog.addString("Date (dd-mm-yyyy):", date);
   Dialog.addCheckbox("Automatic selection of bead", choice);
   Dialog.addCheckbox("Close source image when done", choiceClose);
   Dialog.addCheckbox("Display theoretical values", choiceValues);
