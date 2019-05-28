@@ -303,8 +303,8 @@ run("Square Root");
 getStatistics(area, mean, min, max, std, histogram);
 setMinAndMax(mean, max);
 run("Invert");
-run("LUTforPSFs");
 run("8-bit");
+run("LUTforPSFs");
 run("RGB Color");
 
 // _______________________FWHM axial_______________________ ;
